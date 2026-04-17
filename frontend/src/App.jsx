@@ -129,7 +129,7 @@ export default function App() {
   ).sort(([categoryA], [categoryB]) => categoryA.localeCompare(categoryB));
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.2),_transparent_35%),linear-gradient(180deg,#08111f_0%,#020617_100%)] px-4 py-10 text-slate-100">
+    <main className="relative min-h-screen px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl">
         <section className="mb-8 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur">
           <p className="mb-3 text-sm uppercase tracking-[0.3em] text-orange-300">

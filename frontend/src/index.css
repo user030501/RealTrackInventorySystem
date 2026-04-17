@@ -10,6 +10,24 @@
 body {
   margin: 0;
   min-width: 320px;
+  background-image: url('sarisaristore.png');
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Dark overlay for text readability */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(8, 17, 31, 0.92) 0%, rgba(2, 6, 23, 0.88) 100%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 button,
