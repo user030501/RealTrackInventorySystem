@@ -49,6 +49,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const productsCollection = db.collection("products");
+const salesCollection = db.collection("sales");
 const timestamp = admin.firestore.FieldValue.serverTimestamp;
 
-export { admin, db, productsCollection, timestamp };
+export { admin, db, productsCollection, salesCollection, timestamp };

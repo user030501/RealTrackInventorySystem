@@ -35,6 +35,7 @@ const sampleProducts = [
     productName: "555 Sardines",
     category: "Canned Goods",
     imageUrl: "/images/555Sardines.png",
+    unitPrice: 22.00,
     stockLevel: 36
   },
   {
@@ -42,6 +43,7 @@ const sampleProducts = [
     productName: "Lucky Me Pancit Canton",
     category: "Instant Noodles",
     imageUrl: "/images/LuckyMePancitCanton.png",
+    unitPrice: 19.00,
     stockLevel: 48
   },
   {
@@ -49,6 +51,7 @@ const sampleProducts = [
     productName: "Nissin Cup Noodles",
     category: "Instant Noodles",
     imageUrl: "/images/NissinCupNoodles.png",
+    unitPrice: 26.00,
     stockLevel: 20
   },
   {
@@ -56,6 +59,7 @@ const sampleProducts = [
     productName: "Purefoods Corned Beef",
     category: "Canned Goods",
     imageUrl: "/images/PurefoodsCornedBeef.png",
+    unitPrice: 82.00,
     stockLevel: 22
   },
   {
@@ -63,6 +67,7 @@ const sampleProducts = [
     productName: "Milo Sachet",
     category: "Coffee and Milk",
     imageUrl: "/images/MiloSachet.png",
+    unitPrice: 10.00,
     stockLevel: 75
   },
   {
@@ -70,6 +75,7 @@ const sampleProducts = [
     productName: "Nescafe Classic Sachet",
     category: "Coffee and Milk",
     imageUrl: "/images/NescafeClassicSachet.png",
+    unitPrice: 5.00,
     stockLevel: 64
   },
   {
@@ -77,6 +83,7 @@ const sampleProducts = [
     productName: "Bear Brand Powdered Milk",
     category: "Coffee and Milk",
     imageUrl: "/images/BearBrandPowderedMilk.png",
+    unitPrice: 11.20,
     stockLevel: 28
   },
   {
@@ -84,6 +91,7 @@ const sampleProducts = [
     productName: "Coke Mismo",
     category: "Beverages",
     imageUrl: "/images/coke.png",
+    unitPrice: 11.00,
     stockLevel: 30
   },
   {
@@ -91,6 +99,7 @@ const sampleProducts = [
     productName: "Royal Tru-Orange Can",
     category: "Beverages",
     imageUrl: "/images/RoyalTru-OrangeCan.png",
+    unitPrice: 35.00,
     stockLevel: 20
   },
   {
@@ -98,6 +107,7 @@ const sampleProducts = [
     productName: "Nature Spring Water",
     category: "Beverages",
     imageUrl: "/images/naturespringwater.png",
+    unitPrice: 15.00,
     stockLevel: 40
   },
   {
@@ -105,6 +115,7 @@ const sampleProducts = [
     productName: "SkyFlakes Crackers",
     category: "Snacks and Biscuits",
     imageUrl: "/images/SkyFlakesCrackers.png",
+    unitPrice: 7.00,
     stockLevel: 31
   },
   {
@@ -112,6 +123,7 @@ const sampleProducts = [
     productName: "Fudgee Bar",
     category: "Snacks and Biscuits",
     imageUrl: "/images/FudgeeBar.png",
+    unitPrice: 8.00,
     stockLevel: 52
   },
   {
@@ -119,6 +131,7 @@ const sampleProducts = [
     productName: "Piattos Cheese",
     category: "Snacks and Biscuits",
     imageUrl: "/images/PiattosCheese.png",
+    unitPrice: 16.00,
     stockLevel: 18
   },
   {
@@ -126,6 +139,7 @@ const sampleProducts = [
     productName: "Rebisco Crackers",
     category: "Snacks and Biscuits",
     imageUrl: "/images/RebiscoCrackers.png",
+    unitPrice: 7.00,
     stockLevel: 27
   },
   {
@@ -133,6 +147,7 @@ const sampleProducts = [
     productName: "Surf Detergent Sachet",
     category: "Household Essentials",
     imageUrl: "/images/SurfDetergentSachet.png",
+    unitPrice: 16.00,
     stockLevel: 46
   },
   {
@@ -140,6 +155,7 @@ const sampleProducts = [
     productName: "Downy Fabric Conditioner Sachet",
     category: "Household Essentials",
     imageUrl: "/images/DownyFabricConditionerSachet.png",
+    unitPrice: 15.00,
     stockLevel: 33
   },
   {
@@ -147,6 +163,7 @@ const sampleProducts = [
     productName: "Joy Dishwashing Liquid",
     category: "Household Essentials",
     imageUrl: "/images/JoyDishwashingLiquid.png",
+    unitPrice: 10.00,
     stockLevel: 14
   },
   {
@@ -154,6 +171,7 @@ const sampleProducts = [
     productName: "Safeguard Soap",
     category: "Personal Care",
     imageUrl: "/images/SafeguardSoap.png",
+    unitPrice: 22.00,
     stockLevel: 26
   },
   {
@@ -161,6 +179,7 @@ const sampleProducts = [
     productName: "Colgate Toothpaste Small",
     category: "Personal Care",
     imageUrl: "/images/ColgateToothpasteSmall.png",
+    unitPrice: 9.50,
     stockLevel: 19
   },
   {
@@ -168,6 +187,7 @@ const sampleProducts = [
     productName: "Palmolive Shampoo Sachet",
     category: "Personal Care",
     imageUrl: "/images/PalmoliveShampooSachet.png",
+    unitPrice: 6.00,
     stockLevel: 58
   },
   {
@@ -175,6 +195,7 @@ const sampleProducts = [
     productName: "Champorado Mix",
     category: "Cooking Staples",
     imageUrl: "/images/ChamporadoMix.png",
+    unitPrice: 36.00,
     stockLevel: 11
   },
   {
@@ -182,6 +203,7 @@ const sampleProducts = [
     productName: "Rice 1kg",
     category: "Cooking Staples",
     imageUrl: "/images/Rice1kg.png",
+    unitPrice: 60.00,
     stockLevel: 16
   },
   {
@@ -189,6 +211,7 @@ const sampleProducts = [
     productName: "Brown Sugar 500g",
     category: "Cooking Staples",
     imageUrl: "/images/BrownSugar500g.png",
+    unitPrice: 35.00,
     stockLevel: 13
   },
   {
@@ -196,6 +219,7 @@ const sampleProducts = [
     productName: "Soy Sauce Small",
     category: "Cooking Staples",
     imageUrl: "/images/SoySauceSmall.png",
+    unitPrice: 8.00,
     stockLevel: 21
   },
   {
@@ -203,6 +227,7 @@ const sampleProducts = [
     productName: "Vinegar Small",
     category: "Cooking Staples",
     imageUrl: "/images/VinegarSmall.png",
+    unitPrice: 8.00,
     stockLevel: 9
   }
 ];
@@ -222,6 +247,7 @@ async function seedProducts() {
       category: product.category,
       imageUrl: product.imageUrl,
       productName: product.productName,
+      unitPrice: product.unitPrice,
       stockLevel: product.stockLevel,
       lastUpdated: timestamp()
     });
