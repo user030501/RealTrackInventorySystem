@@ -4,30 +4,64 @@
 
 :root {
   color-scheme: dark;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Trebuchet MS", "Aptos", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(84, 201, 146, 0.12), transparent 28%),
+    radial-gradient(circle at right 20%, rgba(255, 255, 255, 0.04), transparent 24%),
+    linear-gradient(145deg, #162326 0%, #19282b 28%, #182528 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #182528;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background-image: url('sarisaristore.png');
-  background-attachment: fixed;
+  min-height: 100vh;
+  color: #ecf6f3;
+  background:
+    linear-gradient(145deg, rgba(18, 30, 32, 0.56) 0%, rgba(16, 26, 29, 0.48) 100%),
+    url("/sarisaristore.png");
   background-position: center;
-  background-size: cover;
   background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
-/* Dark overlay for text readability */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(8, 17, 31, 0.92) 0%, rgba(2, 6, 23, 0.88) 100%);
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 15, 17, 0.12) 0%, rgba(8, 15, 17, 0.26) 100%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: auto, 120px 120px, 120px 120px;
+  pointer-events: none;
+  opacity: 0.28;
+  z-index: -2;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(110, 231, 183, 0.16), transparent 12%),
+    radial-gradient(circle at 90% 12%, rgba(255, 255, 255, 0.08), transparent 8%),
+    radial-gradient(circle at 84% 28%, rgba(255, 255, 255, 0.04), transparent 10%);
   pointer-events: none;
   z-index: -1;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 button,
@@ -35,4 +69,32 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+input::placeholder {
+  color: #6f8581;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 26, 28, 0.7);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(15, 26, 28, 0.7);
+  border-radius: 999px;
+  background: rgba(141, 174, 164, 0.35);
+}
+
+::selection {
+  background: rgba(110, 231, 183, 0.28);
+  color: #ffffff;
 }
