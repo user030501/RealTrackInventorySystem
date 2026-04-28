@@ -57,9 +57,130 @@ async function fetchProducts() {
   return snapshot.docs.map(mapProduct);
 }
 
-async function fetchSales() {
-  const snapshot = await salesCollection.orderBy("createdAt", "desc").limit(50).get();
+async function fetchSales({ limit = 50, days = null } = {}) {
+  let query = salesCollection.orderBy("createdAt", "desc");
+
+  if (days != null) {
+    const threshold = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    query = query.where("createdAt", ">=", threshold);
+  }
+
+  if (limit != null) {
+    query = query.limit(limit);
+  }
+
+  const snapshot = await query.get();
   return snapshot.docs.map(mapSale);
+}
+
+function buildWeeklyDemandTrend(sales, days = 7) {
+  const dailySalesMap = sales.reduce((accumulator, sale) => {
+    const dateKey = (sale.createdAt || "").slice(0, 10);
+
+    if (!dateKey) {
+      return accumulator;
+    }
+
+    const existing = accumulator.get(dateKey) || {
+      date: dateKey,
+      quantity: 0,
+      revenue: 0
+    };
+
+    existing.quantity += sale.quantity;
+    existing.revenue += sale.totalAmount;
+    accumulator.set(dateKey, existing);
+    return accumulator;
+  }, new Map());
+
+  return Array.from(dailySalesMap.values())
+    .sort((left, right) => left.date.localeCompare(right.date))
+    .slice(-days);
+}
+
+function buildProductRecommendations(products, sales, lookbackDays = 30) {
+  const salesByProduct = sales.reduce((accumulator, sale) => {
+    const productId = sale.productId;
+    const existing = accumulator.get(productId) || {
+      productId,
+      productName: sale.productName,
+      totalQuantity: 0,
+      dailyQuantity: new Map()
+    };
+
+    existing.totalQuantity += sale.quantity;
+
+    const dayKey = (sale.createdAt || "").slice(0, 10);
+    if (dayKey) {
+      existing.dailyQuantity.set(dayKey, (existing.dailyQuantity.get(dayKey) || 0) + sale.quantity);
+    }
+
+    accumulator.set(productId, existing);
+    return accumulator;
+  }, new Map());
+
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0, 10);
+  const trendStart = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000);
+
+  return products.map((product) => {
+    const salesSummary = salesByProduct.get(product.id);
+    const totalQuantity = salesSummary?.totalQuantity || 0;
+    const dailyQuantity = salesSummary?.dailyQuantity || new Map();
+
+    const dailyDates = Array.from(dailyQuantity.keys()).map((dateKey) => new Date(dateKey).getTime()).filter(Boolean);
+    const earliestSaleTimestamp = dailyDates.length ? Math.min(...dailyDates) : null;
+    const daysObserved = earliestSaleTimestamp
+      ? Math.max(
+          7,
+          Math.min(
+            lookbackDays,
+            Math.floor((Date.now() - earliestSaleTimestamp) / (24 * 60 * 60 * 1000)) + 1
+          )
+        )
+      : 7;
+
+    const averageDailySales = totalQuantity > 0 ? totalQuantity / daysObserved : 0;
+    const predictedDaysUntilStockout = averageDailySales > 0 ? Math.ceil(product.stockLevel / averageDailySales) : null;
+    const last24hSales = dailyQuantity.get(todayKey) || 0;
+    const spikeAlert = averageDailySales > 0 && last24hSales >= 3 && last24hSales > averageDailySales * 2;
+
+    const reorderNeeded =
+      product.stockLevel <= 5 ||
+      (predictedDaysUntilStockout != null && predictedDaysUntilStockout <= 7);
+
+    const riskLevel = product.stockLevel <= 0
+      ? "critical"
+      : predictedDaysUntilStockout != null && predictedDaysUntilStockout <= 2
+      ? "critical"
+      : predictedDaysUntilStockout != null && predictedDaysUntilStockout <= 7
+      ? "soon"
+      : "healthy";
+
+    let recommendationText = "Stock levels are healthy for now.";
+    if (product.stockLevel <= 0) {
+      recommendationText = "Out of stock — reorder immediately.";
+    } else if (predictedDaysUntilStockout != null) {
+      recommendationText = `Forecast shows about ${predictedDaysUntilStockout} day${predictedDaysUntilStockout === 1 ? "" : "s"} until stockout.`;
+    } else if (totalQuantity === 0) {
+      recommendationText = "No recent sales data to forecast demand.";
+    }
+
+    return {
+      productId: product.id,
+      productName: product.productName,
+      category: product.category,
+      stockLevel: product.stockLevel,
+      averageDailySales: Number(averageDailySales.toFixed(2)),
+      predictedDaysUntilStockout,
+      reorderNeeded,
+      riskLevel,
+      recommendationText,
+      last24hSales,
+      spikeAlert,
+      isLowStock: product.stockLevel > 0 && product.stockLevel <= 5
+    };
+  });
 }
 
 async function broadcastProducts() {
@@ -171,6 +292,39 @@ app.get("/api/reports/summary", async (_req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to build report summary.",
+      error: error.message
+    });
+  }
+});
+
+app.get("/api/recommendations", async (_req, res) => {
+  try {
+    const [products, recentSales] = await Promise.all([
+      fetchProducts(),
+      fetchSales({ days: 30, limit: 500 })
+    ]);
+
+    const recommendations = buildProductRecommendations(products, recentSales, 30);
+    const atRiskCount = recommendations.filter((recommendation) => recommendation.reorderNeeded).length;
+    const anomalyAlerts = recommendations
+      .filter((recommendation) => recommendation.spikeAlert)
+      .map((recommendation) => ({
+        productId: recommendation.productId,
+        productName: recommendation.productName,
+        last24hSales: recommendation.last24hSales,
+        averageDailySales: recommendation.averageDailySales
+      }));
+    const weeklyDemandTrend = buildWeeklyDemandTrend(recentSales, 7);
+
+    res.json({
+      recommendations,
+      atRiskCount,
+      anomalyAlerts,
+      weeklyDemandTrend
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch recommendations.",
       error: error.message
     });
   }

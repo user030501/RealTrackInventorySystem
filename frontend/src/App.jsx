@@ -250,6 +250,22 @@ function MetricCard({ title, value, hint }) {
   );
 }
 
+function ForecastBadge({ recommendation }) {
+  if (!recommendation || recommendation.riskLevel === "healthy") {
+    return null;
+  }
+
+  const badgeClass = recommendation.riskLevel === "critical"
+    ? "border-rose-400/20 bg-rose-400/10 text-rose-100"
+    : "border-amber-300/20 bg-amber-300/10 text-amber-50";
+
+  return (
+    <span className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>
+      {recommendation.recommendationText}
+    </span>
+  );
+}
+
 function InventoryView({
   products,
   filteredProducts,
@@ -262,7 +278,8 @@ function InventoryView({
   activeCategories,
   status,
   lowStockCount,
-  onAddProductClick
+  onAddProductClick,
+  recommendationMap
 }) {
   return (
     <>
@@ -374,6 +391,7 @@ function InventoryView({
                       <span>|</span>
                       <span className="text-slate-400">Updated {formatTimestamp(product.lastUpdated)}</span>
                     </div>
+                    <ForecastBadge recommendation={recommendationMap.get(product.id)} />
                   </div>
                 </div>
 
@@ -450,6 +468,7 @@ function InventoryView({
                   <p className="mt-2 text-3xl font-black text-white">{product.stockLevel}</p>
                   <p className="mt-1 text-sm text-slate-400">{formatCurrency(product.unitPrice)} SRP</p>
                 </div>
+                <ForecastBadge recommendation={recommendationMap.get(product.id)} />
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <p className="text-xs leading-5 text-slate-400">Updated {formatTimestamp(product.lastUpdated)}</p>
                   <button
@@ -641,10 +660,10 @@ function SalesView({
   );
 }
 
-function ReportsView({ reportSummary }) {
+function ReportsView({ reportSummary, recommendations, recommendationSummary }) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard title="Total Sales" value={reportSummary.totalSales} hint="Recorded sales transactions." />
         <MetricCard title="Units Sold" value={reportSummary.totalUnitsSold} hint="Total pieces moved from stock." />
         <MetricCard
@@ -657,7 +676,99 @@ function ReportsView({ reportSummary }) {
           value={reportSummary.lowStockProducts}
           hint={`${reportSummary.outOfStockProducts} completely out of stock.`}
         />
+        <MetricCard
+          title="Restock Risk"
+          value={recommendationSummary.atRiskCount}
+          hint="Products forecast to need action soon."
+        />
       </div>
+
+      <section className="rounded-[26px] border border-white/8 bg-[#304247]/54 p-5">
+        <div className="mb-4">
+          <h2 className="text-2xl font-black text-white">Restock forecast</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            AI-based predictions show which products are likely to run low soon and where demand is increasing.
+          </p>
+        </div>
+
+        {recommendations?.length > 0 ? (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {recommendations.slice(0, 4).map((recommendation) => (
+              <article
+                key={recommendation.productId}
+                className="rounded-[22px] border border-white/8 bg-[#243438]/64 px-4 py-4"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-slate-500">{recommendation.productName}</p>
+                    <h3 className="mt-2 text-lg font-black text-white">{recommendation.stockLevel} units</h3>
+                  </div>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                      recommendation.riskLevel === "critical"
+                        ? "border-rose-400/20 bg-rose-400/10 text-rose-100"
+                        : "border-amber-300/20 bg-amber-300/10 text-amber-50"
+                    }`}
+                  >
+                    {recommendation.riskLevel === "critical" ? "Critical" : "At risk"}
+                  </span>
+                </div>
+
+                <p className="mt-3 text-sm text-slate-300">{recommendation.recommendationText}</p>
+                <div className="mt-4 grid gap-2 text-sm text-slate-400">
+                  <div className="flex items-center justify-between">
+                    <span>Avg daily sales</span>
+                    <span>{recommendation.averageDailySales}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Predicted stockout</span>
+                    <span>{recommendation.predictedDaysUntilStockout ?? "Unknown"} days</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[24px] border border-dashed border-white/12 bg-[#243438]/58 px-6 py-14 text-center">
+            <p className="text-xl font-bold text-white">No recommendations available</p>
+            <p className="mt-2 text-slate-400">Record more sales so the forecasting engine can learn your demand patterns.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-[26px] border border-white/8 bg-[#304247]/54 p-5">
+        <div className="mb-4">
+          <h2 className="text-2xl font-black text-white">Demand alerts</h2>
+          <p className="mt-2 text-sm text-slate-400">Spot spikes in the last 24 hours and review items that may need extra attention.</p>
+        </div>
+
+        {recommendationSummary.anomalyAlerts?.length > 0 ? (
+          <div className="space-y-3">
+            {recommendationSummary.anomalyAlerts.map((alert) => (
+              <article
+                key={alert.productId}
+                className="rounded-[22px] border border-emerald-300/20 bg-emerald-300/10 px-4 py-4"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{alert.productName}</p>
+                    <p className="mt-1 text-sm text-slate-300">Demand spike detected in the last 24 hours.</p>
+                  </div>
+                  <div className="text-right text-sm text-slate-200">
+                    <p>{alert.last24hSales} units</p>
+                    <p className="text-slate-400">vs avg {alert.averageDailySales}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[24px] border border-dashed border-white/12 bg-[#243438]/58 px-6 py-14 text-center">
+            <p className="text-xl font-bold text-white">No demand spikes detected</p>
+            <p className="mt-2 text-slate-400">Your sales are steady based on the latest available history.</p>
+          </div>
+        )}
+      </section>
 
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="rounded-[26px] border border-white/8 bg-[#304247]/54 p-5">
@@ -738,6 +849,12 @@ export default function App() {
     outOfStockProducts: 0,
     topProducts: [],
     dailySales: []
+  });
+  const [recommendations, setRecommendations] = useState([]);
+  const [recommendationSummary, setRecommendationSummary] = useState({
+    atRiskCount: 0,
+    anomalyAlerts: [],
+    weeklyDemandTrend: []
   });
   const [status, setStatus] = useState("Connecting to live inventory...");
   const [pendingProductId, setPendingProductId] = useState(null);
@@ -826,8 +943,37 @@ export default function App() {
       }
     }
 
+    async function loadRecommendations() {
+      try {
+        const response = await fetch(`${API_URL}/api/recommendations`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to load recommendations.");
+        }
+
+        if (isMounted) {
+          setRecommendations(data.recommendations || []);
+          setRecommendationSummary({
+            atRiskCount: data.atRiskCount || 0,
+            anomalyAlerts: data.anomalyAlerts || [],
+            weeklyDemandTrend: data.weeklyDemandTrend || []
+          });
+        }
+      } catch (_error) {
+        if (isMounted) {
+          setRecommendations([]);
+          setRecommendationSummary((current) => ({
+            ...current,
+            anomalyAlerts: [],
+            weeklyDemandTrend: []
+          }));
+        }
+      }
+    }
+
     async function loadDashboardData() {
-      await Promise.all([loadProducts(), loadSales(), loadReports()]);
+      await Promise.all([loadProducts(), loadSales(), loadReports(), loadRecommendations()]);
     }
 
     loadDashboardData();
@@ -852,11 +998,13 @@ export default function App() {
       setStatus(`${payload.productName} updated in real time.`);
       loadSales();
       loadReports();
+      loadRecommendations();
     });
 
     socket.on("sale:created", () => {
       loadSales();
       loadReports();
+      loadRecommendations();
     });
 
     return () => {
@@ -1061,6 +1209,16 @@ export default function App() {
   const totalUnits = filteredProducts.reduce((sum, product) => sum + product.stockLevel, 0);
   const lowStockCount = filteredProducts.filter((product) => product.stockLevel <= 5).length;
   const activeCategories = new Set(filteredProducts.map((product) => getCategoryLabel(product.category))).size;
+  const recommendationMap = new Map(recommendations.map((recommendation) => [recommendation.productId, recommendation]));
+  const topRestockRisks = recommendations
+    .filter((recommendation) => recommendation.reorderNeeded)
+    .sort((left, right) => {
+      if (left.riskLevel === right.riskLevel) {
+        return (left.predictedDaysUntilStockout || Infinity) - (right.predictedDaysUntilStockout || Infinity);
+      }
+      return left.riskLevel === "critical" ? -1 : 1;
+    })
+    .slice(0, 4);
 
   const statusFilters = [
     { key: "all", label: "All", count: productCounts.all },
@@ -1253,6 +1411,7 @@ export default function App() {
                   status={status}
                   lowStockCount={lowStockCount}
                   onAddProductClick={() => setShowAddProductModal(true)}
+                  recommendationMap={recommendationMap}
                 />
               )}
 
@@ -1268,7 +1427,13 @@ export default function App() {
                 />
               )}
 
-              {activeView === "Reports" && <ReportsView reportSummary={reportSummary} />}
+              {activeView === "Reports" && (
+                <ReportsView
+                  reportSummary={reportSummary}
+                  recommendations={recommendations}
+                  recommendationSummary={recommendationSummary}
+                />
+              )}
             </section>
           </div>
         </div>
